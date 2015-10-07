@@ -8,7 +8,6 @@ class SynchronizationOauth < Sequel::Model
   many_to_one :user
 
   PUBLIC_ATTRIBUTES = [
-    :id,
     :user_id,
     :service,
     :token
@@ -30,12 +29,8 @@ class SynchronizationOauth < Sequel::Model
       ).first
       errors.add(:user_id, " already has an oauth token created for service #{:service}") unless existing_oauth.nil?
     else
-      existing_oauth = SynchronizationOauth.filter(
-        id: id
-      ).first
-      unless (existing_oauth.service == service && existing_oauth.user_id == user_id)
-        errors.add(:id, ' cannot change user or service, only token')
-      end
+      errors.add(:user_id, ' cannot modify user, only token') if changed_columns.include?(:user_id)
+      errors.add(:service, ' cannot modify service, only token') if changed_columns.include?(:service)
     end
   end
 
